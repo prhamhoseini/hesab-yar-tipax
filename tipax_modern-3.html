@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffd400">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>بسته تیپاکس</title>
+<style>
+:root{--yellow:#ffd400;--blue:#0877c9;--ink:#17212b;--muted:#6d7782;--bg:#f4f6f8;--card:#fff;--green:#16a34a;--red:#dc2626}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Tahoma,Arial,sans-serif}
+header{background:linear-gradient(135deg,#ffd400,#ffdf4d);padding:22px 18px 18px;border-radius:0 0 26px 26px;box-shadow:0 4px 18px #0001}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:52px;height:52px;border-radius:16px;background:#0877c9;color:#ffd400;display:grid;place-items:center;font-size:25px;font-weight:900;box-shadow:0 5px 12px #0877c933}.brand h1{font-size:22px;margin:0}.brand p{margin:4px 0 0;font-size:12px;color:#26323c}
+main{max-width:760px;margin:auto;padding:15px 14px 35px}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}.tab{border:0;padding:13px;border-radius:14px;background:#fff;color:var(--muted);font-weight:700}.tab.active{background:var(--blue);color:#fff}
+.card{background:var(--card);border-radius:20px;padding:17px;margin-bottom:13px;box-shadow:0 5px 20px #0000000b;border:1px solid #e9edf1}.card h2{font-size:16px;margin:0 0 14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.full{grid-column:1/-1}label{font-size:12px;color:var(--muted);display:block;margin:0 0 6px}input,select{width:100%;border:1px solid #dce2e7;border-radius:13px;padding:13px;background:#fafbfc;font-size:14px;outline:none}input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #0877c91a}
+button.primary{width:100%;border:0;border-radius:14px;padding:14px;background:var(--blue);color:white;font-size:15px;font-weight:800;margin-top:5px}.danger{background:#fff0f0;color:var(--red);border:0;border-radius:10px;padding:8px 10px}.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat{padding:14px 10px;border-radius:16px;background:#f8fafc;text-align:center}.stat b{display:block;font-size:18px;margin-bottom:5px}.stat span{font-size:11px;color:var(--muted)}
+.item{border:1px solid #edf0f2;border-radius:15px;padding:12px;margin-top:9px}.item strong{font-size:14px}.item small{color:var(--muted);display:block;margin-top:5px;line-height:1.7}.badge{display:inline-block;padding:4px 8px;border-radius:8px;background:#e9f7ee;color:var(--green);font-size:10px}.empty{text-align:center;color:var(--muted);padding:25px 5px;font-size:13px}
+.hidden{display:none!important}.total{font-size:21px;font-weight:900;color:var(--blue)}.toolbar{display:flex;gap:8px}.toolbar>*{flex:1}
+@media(max-width:480px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.stats{grid-template-columns:1fr 1fr}.stats .stat:last-child{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div class="logo">T</div><div><h1>بسته تیپاکس</h1><p>ثبت و مدیریت حرفه‌ای مرسوله‌ها</p></div></div></header>
+<main>
+<div class="tabs"><button class="tab active" onclick="showTab('register',this)">ثبت بسته</button><button class="tab" onclick="showTab('reports',this)">گزارش روزانه</button></div>
+
+<section id="register">
+<div class="card"><h2>ثبت مرسوله جدید</h2>
+<form id="form"><div class="grid">
+<div class="full"><label>نام صاحب بسته</label><input id="name" required placeholder="مثلاً علی رضایی"></div>
+<div><label>تاریخ</label><input id="date" type="text" readonly required placeholder="انتخاب تاریخ شمسی" onclick="openJalaliPicker('date')"></div>
+<div><label>مبلغ (تومان)</label><input id="amount" type="number" min="0" required placeholder="مثلاً 250000"></div>
+<div><label>روش پرداخت</label><select id="payment"><option>کارت‌خوان</option><option>انتقال</option><option>نقدی</option></select></div>
+<div><label>کد مرسوله (اختیاری)</label><input id="tracking" placeholder="کد پیگیری"></div>
+<div class="full"><label>توضیحات (اختیاری)</label><input id="note" placeholder="توضیحات بسته"></div>
+<div class="full"><button class="primary">ثبت بسته</button></div>
+</div></form></div>
+
+<div class="card"><div class="row"><h2>آخرین بسته‌ها</h2><button class="danger" onclick="clearAll()">پاک کردن همه</button></div><div id="recent"></div></div>
+</section>
+
+<section id="reports" class="hidden">
+<div class="card"><h2>گزارش یک روز</h2><label>تاریخ موردنظر را انتخاب کنید</label><input id="reportDate" type="text" readonly placeholder="انتخاب تاریخ شمسی" onclick="openJalaliPicker('reportDate')">
+<div class="stats" style="margin-top:12px"><div class="stat"><b id="count">۰</b><span>تعداد بسته</span></div><div class="stat"><b id="sum">۰</b><span>مجموع مبلغ</span></div><div class="stat"><b id="methods">۰ / ۰</b><span>کارت‌خوان / انتقال</span></div></div></div>
+<div class="card"><div class="row"><h2>بسته‌های این روز</h2><span class="total" id="dailyTotal">۰ تومان</span></div><div id="dailyList"></div></div>
+</section>
+</main>
+<script>
+const KEY='tipax_packages_v2';
+const fa=n=>Number(n||0).toLocaleString('fa-IR');
+const todayISO=()=>new Date().toISOString().slice(0,10);
+const load=()=>JSON.parse(localStorage.getItem(KEY)||'[]');
+const save=x=>localStorage.setItem(KEY,JSON.stringify(x));
+document.getElementById('date').value=jalaliToday();document.getElementById('reportDate').value=jalaliToday();
+
+function showTab(id,btn){document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');if(id==='reports')renderReport();else renderRecent()}
+document.getElementById('form').addEventListener('submit',e=>{e.preventDefault();let x=load();x.unshift({id:Date.now(),name:name.value,date:jalaliToISOForStorage(date.value),amount:+amount.value,payment:payment.value,tracking:tracking.value,note:note.value});save(x);e.target.reset();date.value=jalaliToday();alert('بسته با موفقیت ثبت شد');renderRecent()});
+document.getElementById('reportDate').addEventListener('change',renderReport);
+
+function item(p){return `<div class="item"><div class="row"><strong>${esc(p.name)}</strong><span class="badge">${esc(p.payment)}</span></div><small>تاریخ: ${toFaDate(p.date)}<br>مبلغ: ${fa(p.amount)} تومان${p.tracking?'<br>کد مرسوله: '+esc(p.tracking):''}${p.note?'<br>'+esc(p.note):''}</small><div style="text-align:left;margin-top:8px"><button class="danger" onclick="del(${p.id})">حذف</button></div></div>`}
+
+function div(a,b){return Math.floor(a/b)}
+function gregorianToJalali(gy,gm,gd){
+ let gdm=[0,31,59,90,120,151,181,212,243,273,304,334],jy;
+ let gy2=gm>2?gy+1:gy;
+ let days=355666+365*gy+div(gy2+3,4)-div(gy2+99,100)+div(gy2+399,400)+gd+gdm[gm-1];
+ jy=-1595+33*div(days,12053); days%=12053;
+ jy+=4*div(days,1461); days%=1461;
+ if(days>365){jy+=div(days-1,365);days=(days-1)%365}
+ let jm=days<186?1+div(days,31):7+div(days-186,30);
+ let jd=1+(days<186?days%31:(days-186)%30);
+ return [jy,jm,jd]
+}
+function jalaliToGregorian(jy,jm,jd){
+ let gy=jy+621;
+ let days=-355668+365*gy+div(gy+3,4)-div(gy+99,100)+div(gy+399,400)+jd+(jm<7?(jm-1)*31:(jm-7)*30+186);
+ let gyear=400*div(days,146097); days%=146097;
+ if(days>36524){gyear+=100*div(--days,36524);days%=36524;if(days>=365)days++}
+ gyear+=4*div(days,1461);days%=1461;
+ if(days>365){gyear+=div(days-1,365);days=(days-1)%365}
+ let gm=1, gd=days+1, md=[31,(gyear%4===0&&(gyear%100!==0||gyear%400===0))?29:28,31,30,31,30,31,31,30,31,30,31];
+ for(let i=0;i<12&&gd>md[i];i++){gd-=md[i];gm++}
+ return `${gyear}-${String(gm).padStart(2,'0')}-${String(gd).padStart(2,'0')}`
+}
+function jalaliToday(){
+ const d=new Date(), j=gregorianToJalali(d.getFullYear(),d.getMonth()+1,d.getDate());
+ return `${j[0]}/${String(j[1]).padStart(2,'0')}/${String(j[2]).padStart(2,'0')}`;
+}
+function jalaliDisplay(s){return s.replaceAll('/','/')}
+function openJalaliPicker(id){
+ const old=document.getElementById('jp'); if(old) old.remove();
+ const input=document.getElementById(id), now=jalaliToday().split('/').map(Number);
+ let y=now[0],m=now[1],d=now[2];
+ const box=document.createElement('div');box.id='jp';
+ box.style.cssText='position:fixed;inset:0;background:#0008;display:grid;place-items:center;z-index:9999;padding:18px';
+ box.innerHTML=`<div style="background:#fff;border-radius:20px;padding:18px;width:min(360px,100%);box-shadow:0 15px 50px #0005">
+ <div style="font-weight:800;font-size:17px;margin-bottom:14px">انتخاب تاریخ شمسی</div>
+ <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+ <input id="jpy" inputmode="numeric" value="${y}" placeholder="سال">
+ <select id="jpm">${Array.from({length:12},(_,i)=>`<option value="${i+1}" ${i+1===m?'selected':''}>ماه ${i+1}</option>`).join('')}</select>
+ <input id="jpd" inputmode="numeric" value="${d}" placeholder="روز">
+ </div>
+ <button id="jpok" class="primary" style="margin-top:12px">تأیید</button>
+ <button id="jpcancel" style="width:100%;border:0;background:#f1f3f5;border-radius:14px;padding:12px;margin-top:8px">انصراف</button>
+ </div>`;
+ document.body.appendChild(box);
+ box.querySelector('#jpcancel').onclick=()=>box.remove();
+ box.querySelector('#jpok').onclick=()=>{
+   y=+box.querySelector('#jpy').value;m=+box.querySelector('#jpm').value;d=+box.querySelector('#jpd').value;
+   const max=m<=6?31:(m<=11?30:30);
+   if(y<1300||y>1500||m<1||m>12||d<1||d>max){alert('تاریخ شمسی واردشده صحیح نیست');return}
+   input.value=`${y}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}`;
+   box.remove();
+   if(id==='reportDate') renderReport();
+ };
+}
+function jalaliToISOForStorage(s){
+ const [y,m,d]=s.split('/').map(Number);
+ return jalaliToGregorian(y,m,d);
+}
+function storageDateToJalali(s){
+ const [y,m,d]=s.split('-').map(Number), j=gregorianToJalali(y,m,d);
+ return `${j[0]}/${String(j[1]).padStart(2,'0')}/${String(j[2]).padStart(2,'0')}`;
+}
+
+function renderRecent(){let x=load().slice(0,10);recent.innerHTML=x.length?x.map(item).join(''):'<div class="empty">هنوز بسته‌ای ثبت نشده است.</div>'}
+function renderReport(){let d=reportDate.value, iso=jalaliToISOForStorage(d), x=load().filter(p=>p.date===iso),total=x.reduce((a,p)=>a+p.amount,0),card=x.filter(p=>p.payment==='کارت‌خوان').length,transfer=x.filter(p=>p.payment==='انتقال').length;count.textContent=fa(x.length);sum.textContent=fa(total);methods.textContent=fa(card)+' / '+fa(transfer);dailyTotal.textContent=fa(total)+' تومان';dailyList.innerHTML=x.length?x.map(item).join(''):'<div class="empty">برای این تاریخ بسته‌ای ثبت نشده است.</div>'}
+function del(id){save(load().filter(p=>p.id!==id));renderRecent();renderReport()}
+function clearAll(){if(confirm('همه اطلاعات حذف شود؟')){localStorage.removeItem(KEY);renderRecent();renderReport()}}
+function toFaDate(s){if(!s)return'';let [y,m,d]=s.split('-');return storageDateToJalali(s)}
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+renderRecent();renderReport();
+</script>
+</body></html>
